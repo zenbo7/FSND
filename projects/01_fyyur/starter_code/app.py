@@ -23,7 +23,7 @@ app.config.from_object('config')
 db = SQLAlchemy(app)
 
 # TODO: connect to a local postgresql database
-migrate = Migrate(app, db)
+migrate = Migrate (app, db)
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
@@ -36,12 +36,15 @@ class Venue(db.Model):
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
     address = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
+    #phone = db.Column(db.String(120))
+    #image_link = db.Column(db.String(500))
+    #facebook_link = db.Column(db.String(120))
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
-    website = db.Column(db.String(120))
+    #website = db.Column(db.String(120))
+
+    def __repr__(self):
+      return f'<the venue is {self.id}{self.name}'
 class Artist(db.Model):
     __tablename__ = 'Artist'
 
@@ -49,10 +52,10 @@ class Artist(db.Model):
     name = db.Column(db.String)
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
+    #phone = db.Column(db.String(120))
+    #genres = db.Column(db.String(120))
+    #image_link = db.Column(db.String(500))
+    #facebook_link = db.Column(db.String(120))
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
