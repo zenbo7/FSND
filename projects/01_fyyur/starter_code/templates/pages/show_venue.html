@@ -1,6 +1,12 @@
 {% extends 'layouts/main.html' %}
 {% block title %}Venue Search{% endblock %}
 {% block content %}
+<style>
+.delete-button{
+	border-radius: 2px;
+	border: 2px solid red;
+}
+</style>
 <div class="row">
 	<div class="col-sm-6">
 		<h1 class="monospace">
@@ -40,7 +46,11 @@
 		<p class="not-seeking">
 			<i class="fas fa-moon"></i> Not currently seeking talent
 		</p>
+		
 		{% endif %}
+		<div>
+			<button class='delete-button' id={{ venue.id }}>Delete this venue</button>
+		</div>
 	</div>
 	<div class="col-sm-6">
 		<img src="{{ venue.image_link }}" alt="Venue Image" />
@@ -59,6 +69,7 @@
 		</div>
 		{% endfor %}
 	</div>
+	
 </section>
 <section>
 	<h2 class="monospace">{{ venue.past_shows_count }} Past {% if venue.past_shows_count == 1 %}Show{% else %}Shows{% endif %}</h2>
@@ -73,7 +84,23 @@
 		</div>
 		{% endfor %}
 	</div>
+	
 </section>
+<script>
+	const deleteBtn = document.querySelector('.delete-button');
+	deleteBtn.onclick = function(e){
+		console.log('delete event', e);
+        const venueId = e.target['id'];
+		console.log(venueId);
+        fetch('/venues/' + venueId, {
+            method: 'DELETE'
+          })
+        .then(function() {
+            const item = e.target.parentElement;
+            item.remove();
+          })
+        }
+</script>
 
 {% endblock %}
 
