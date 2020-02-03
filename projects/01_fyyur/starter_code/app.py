@@ -22,6 +22,8 @@ app = Flask(__name__)
 moment = Moment(app)
 db = setup_db(app)
 
+
+CURRENT_DATE = datetime.now()
 #----------------------------------------------------------------------------#
 # Filters.
 #----------------------------------------------------------------------------#
@@ -69,11 +71,11 @@ def venues():
   for row in sql_data: 
     upcoming_shows = Show.query.filter_by(venue_id=row.id).all()
     upcoming_shows_count =0
-    current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    #current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     show_start_time =''
     for show in upcoming_shows:
       show_start_time = datetime.strftime(show.start_time, '%Y-%m-%d %H:%M:%S')
-      if show_start_time > current_time:
+      if show_start_time > CURRENT_DATE:
         upcoming_shows_count += 1
     if current_city != row.city:
       current_city = row.city
@@ -94,7 +96,7 @@ def search_venues():
   # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
   search_term = '%' + request.form['search_term'] + '%'
   print(search_term)
-  venue_search_result = Venue.query.filter(Venue.name.like(search_term)).all()
+  venue_search_result = Venue.query.filter(Venue.name.ilike(search_term)).all()
   print(venue_search_result)
   
   response={}
@@ -105,15 +107,7 @@ def search_venues():
   for row in venue_search_result:
     new_data = {'id':row.id, 'name':row.name}
     response['data'].append(new_data)
-  #return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
-  # response={
-  #   "count": 1,
-  #   "data": [{
-  #     "id": 2,
-  #     "name": "The Dueling Pianos Bar",
-  #     "num_upcoming_shows": 0,
-  #   }]
-  # }
+  
   return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
 
 @app.route('/venues/<int:venue_id>')
@@ -124,7 +118,7 @@ def show_venue(venue_id):
   data = {} 
   num_upcoming_shows = 0
   num_past_shows = 0
-  current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+  #current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
   venue = Venue.query.get(venue_id) 
   shows = Show.query.filter_by(venue_id=venue.id).all()
   past_shows=[]
@@ -133,7 +127,7 @@ def show_venue(venue_id):
     artist = Artist.query.get(show.artist_id)
     show_start_time = datetime.strftime(show.start_time, '%Y-%m-%d %H:%M:%S')
     show_to_add = {'artist_id': show.artist_id, 'artist_name': artist.name, 'artist_image_link': artist.image_link, 'start_time': show_start_time}
-    if show_start_time > current_time:
+    if show_start_time > CURRENT_DATE:
       num_upcoming_shows += 1
       upcoming_shows.append(show_to_add)
     else: 
@@ -239,7 +233,7 @@ def show_artist(artist_id):
   data = {} 
   num_upcoming_shows = 0
   num_past_shows = 0
-  current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+  #current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
   artist = Artist.query.get(artist_id) 
   shows = Show.query.filter_by(artist_id=artist.id).all()
   past_shows=[]
@@ -248,7 +242,7 @@ def show_artist(artist_id):
     venue = Venue.query.get(show.venue_id)
     show_start_time = datetime.strftime(show.start_time, '%Y-%m-%d %H:%M:%S')
     show_to_add = {'venue_id': show.venue_id, 'venue_name': venue.name, 'venue_image_link': venue.image_link, 'start_time': show_start_time}
-    if show_start_time > current_time:
+    if show_start_time > CURRENT_DATE:
       num_upcoming_shows += 1
       upcoming_shows.append(show_to_add)
     else: 
