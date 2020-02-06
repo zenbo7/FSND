@@ -9,7 +9,7 @@ from flask import Flask, render_template, request, Response, flash, redirect, ur
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 import logging
-from models import setup_db, Venue, Artist, Show
+from models import setup_db, City, State #Venue, Artist, Show,
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
@@ -64,30 +64,45 @@ def venues():
   # TODO-->DONE: replace with real venues data.
   #       num_shows should be aggregated based on number of upcoming shows per venue.
   
-  sql_data = Venue.query.order_by('city', 'state','name').all()
-  current_city = ''
-  current_idx = -1
-  data= []
-  for row in sql_data: 
-    upcoming_shows = Show.query.filter_by(venue_id=row.id).all()
-    upcoming_shows_count =0
-    #current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    show_start_time =''
-    for show in upcoming_shows:
-      show_start_time = datetime.strftime(show.start_time, '%Y-%m-%d %H:%M:%S')
-      if show_start_time > CURRENT_DATE:
-        upcoming_shows_count += 1
-    if current_city != row.city:
-      current_city = row.city
-      current_idx += 1
-      newdata = {'city': row.city, 'state': row.state, 'venues':[{'id': row.id, 'name': row.name, 'num_upcoming_shows': upcoming_shows_count}]}
-      data.append(newdata)
-    else: 
-      newvenue = {'id':row.id, 'name':row.name, 'num_upcoming_shows': upcoming_shows_count}
-      data[current_idx]['venues'].append(newvenue)
-  #TODO: -->DONE number of upcoming shows
-  print(data)
-  return render_template('pages/venues.html', areas=data)
+  # sql_data = Venue.query.all()
+
+  # print(sql_data)
+  # current_city = ''
+  # current_idx = -1
+  # data= []
+  # for row in sql_data: 
+  #   upcoming_shows = Show.query.filter_by(venue_id=row.id).all()
+  #   upcoming_shows_count =0
+  #   #current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+  #   show_start_time =''
+  #   for show in upcoming_shows:
+  #     show_start_time = datetime.strftime(show.start_time, '%Y-%m-%d %H:%M:%S')
+  #     if show_start_time > CURRENT_DATE:
+  #       upcoming_shows_count += 1
+  #   if current_city != row.city:
+  #     current_city = row.city
+  #     current_idx += 1
+  #     newdata = {'city': row.city, 'state': row.state, 'venues':[{'id': row.id, 'name': row.name, 'num_upcoming_shows': upcoming_shows_count}]}
+  #     data.append(newdata)
+  #   else: 
+  #     newvenue = {'id':row.id, 'name':row.name, 'num_upcoming_shows': upcoming_shows_count}
+  #     data[current_idx]['venues'].append(newvenue)
+  # #TODO: -->DONE number of upcoming shows
+  # print(data)
+  cities = City.query.all()
+  # data = [{"city": city.name,
+  #           "state": city.states.name,
+  #           "venues": [{"id": venue.id,
+  #                       "name": venue.name,
+  #                       "num_upcoming_shows":
+  #                           len([show for show in venue.shows
+  #                               if show.start_time > CURRENT_DATE])
+  #                       }
+  #                     for venue in city.venues]
+  #           } for city in cities]
+
+  # return render_template('pages/venues.html', areas=data)
+  return cities
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
