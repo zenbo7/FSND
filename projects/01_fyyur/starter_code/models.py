@@ -26,22 +26,22 @@ def setup_db(app):
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
-# class crud_ops():
+class crud_ops():
 
-#     def insert(self):
-#         """ Insert data """
-#         db.session.add(self)
-#         db.session.commit()
+    def insert(self):
+        """ Insert data """
+        db.session.add(self)
+        db.session.commit()
 
-#     def update(self):
-#         """ Update data """
-#         db.session.commit()
+    def update(self):
+        """ Update data """
+        db.session.commit()
 
-#     def delete(self):
-#         """ Delete data """
-#         db.session.delete(self)
-#         db.session.commit()
-class State(db.Model):
+    def delete(self):
+        """ Delete data """
+        db.session.delete(self)
+        db.session.commit()
+class State(db.Model, crud_ops):
     __tablename__ = "states"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -49,9 +49,9 @@ class State(db.Model):
     cities = db.relationship('City', backref ='state')
 
 
-    def __init__(self, id, name):
-        self.id = id
-        self.name = name
+    # def __init__(self, id, name):
+    #     self.id = id
+    #     self.name = name
 
     def serialize(self):
         return {
@@ -60,70 +60,15 @@ class State(db.Model):
         }
 
 
-class City(db.Model):
-    __tablename__ = "cities"
+
+
+    
+
+class Venue(db.Model, crud_ops):
+    __tablename__ = "venues"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120))
-    state_id = db.Column(db.Integer, db.ForeignKey('states.id'), nullable=True)
-    
-
-    def __init__(self, city_id, name, state_id):
-        self.id = city_id
-        self.name = name
-        self.state_id = state_id
-
-    def serialize(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "state_id": self.state_id
-        }
-
-# class Show(db.Model, crud_ops):
-#     __tablename__ = "shows"
-
-#     id = db.Column(db.Integer, primary_key=True)
-#     venue_id =db.Column(db.Integer, db.ForeignKey("venues.id"))
-#     artist_id = db.Column(db.Integer, db.ForeignKey("artists.id"))
-#     start_time = db.Column(db.DateTime, nullable=False)
-
-#     def __repr__(self):
-#         return f'<the show is {self.id},{self.venue_id},{self.artist_id},{self.start_time}'
-
-#     def artist_details(self):
-#         return {
-#             'artist_id': self.artist_id,
-#             'artist_name': self.Artist.name,
-#             'artist_image_link': self.Artist.image_link,
-#             'start_time': self.start_time
-#         }
-
-#     def venue_details(self):
-#         return {
-#             'venue_id': self.venue_id,
-#             'venue_name': self.Venue.name,
-#             'venue_image_link': self.Venue.image_link,
-#             'start_time': self.start_time
-#         }
-
-#     def insert(self):
-#         db.session.add(self)
-#         db.session.commit()
-
-#     def update(self):
-#         db.session.commit()
-
-#     def delete(self):
-#         db.session.delete(self)
-#         db.session.commit()
-    
-
-# class Venue(db.Model, crud_ops):
-#     __tablename__ = "venues"
-
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String)
+    name = db.Column(db.String)
 #     #city_id =db.Column(db.Integer, db.ForeignKey('City.id'))
 #     # city = db.Column(db.String(120))
 #     # state = db.Column(db.String(120))
@@ -135,31 +80,31 @@ class City(db.Model):
 #     seeking_talent = db.Column(db.Boolean())
 #     seeking_description = db.Column(db.String(120))
 #     image_link = db.Column(db.String(500))
-#     #shows = db.relationship(Show, backref="venues")
-#     #city_id =db.Column(db.Integer, db.ForeignKey("cities.id"))
+    shows = db.relationship("Show", backref="venue")
+    city_id =db.Column(db.Integer, db.ForeignKey("cities.id"))
 #     #city = db.relationship("cities", backref = "venues")
     
+    # def __init__(self, id, name, city_id):
+    #     self.id = id
+    #     self.name = name
+    #     self.city_id = city_id
 
-#     def __repr__(self):
-#       return f'<the venue is {self.id},{self.city},{self.state},{self.name},{self.phone}, {self.genres}, {self.website}'
-
-#     def insert(self):
-#         db.session.add(self)
-#         db.session.commit()
-
-#     def update(self):
-#         db.session.commit()
-
-#     def delete(self):
-#         db.session.delete(self)
-#         db.session.commit()
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "city_id": self.city_id
+        }
 
 
-# class Artist(db.Model):
-#     __tablename__ = "artists"
+    
 
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String)
+
+class Artist(db.Model, crud_ops):
+    __tablename__ = "artists"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
 #     phone = db.Column(db.String(15))
 #     genres = db.Column(db.ARRAY(db.String(20)))
 #     website = db.Column(db.String(120))
@@ -167,73 +112,90 @@ class City(db.Model):
 #     seeking_talent = db.Column(db.Boolean())
 #     seeking_description = db.Column(db.String(120))
 #     image_link = db.Column(db.String(500))
-#     shows = db.relationship("shows", backref="artists", lazy="dynamic")
+    city_id =db.Column(db.Integer, db.ForeignKey("cities.id"))
+    shows = db.relationship("Show", backref="artist")
 #     #city_id =db.Column(db.Integer, db.ForeignKey("cities.id"))
 #     #city = db.relationship("cities", backref = "artists", lazy= "dynamic")
 
-#     def __repr__(self):
-#       return f'<the artist is {self.id},{self.city},{self.state},{self.name},{self.phone}, {self.genres}, {self.website}'
+    # def __init__(self, id, name):
+    #     self.id = id
+    #     self.name = name
 
-#     def insert(self):
-#         db.session.add(self)
-#         db.session.commit()
-
-#     def update(self):
-#         db.session.commit()
-
-#     def delete(self):
-#         db.session.delete(self)
-#         db.session.commit()
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name
+        }
 
 
-# class Venue_City_Link(db.Model, crud_ops):
-#     __tablename__ = "venue_city_link"
-
-#     venue_id = db.Column(db.Integer, db.ForeignKey("venues.id"), primary_key=True)
-#     #city_id = db.Column(db.Integer, db.ForeignKey("cities.id"), primary_key=True)
-#     likes = db.Column(db.Integer)
-#     dislikes = db.Column(db.Integer)
-# # class City(db.Model):
-# #     __tablename__ = 'City'
-
-# #     id = db.Column(db.Integer, primary_key=True)
-# #     city = db.Column(db.String(120))
-# #     state_id =db.Column(db.Integer, db.ForeignKey('State.id'))
-# #     state = db.relationship('State', backref = 'City', lazy= 'dynamic')
-
-# #     def __repr__(self):
-# #       return f'<the city is {self.id},{self.city},{self.state}'
-
-# #     def insert(self):
-# #         db.session.add(self)
-# #         db.session.commit()
-
-# #     def update(self):
-# #         db.session.commit()
-
-# #     def delete(self):
-# #         db.session.delete(self)
-# #         db.session.commit()
 
 
-# # class State(db.Model):
-# #     __tablename__ = 'State'
 
-# #     id = db.Column(db.Integer, primary_key=True)
-# #     state = db.Column(db.String(120))
+class City(db.Model, crud_ops):
+    __tablename__ = "cities"
 
-# #     def __repr__(self):
-# #       return f'<the state is {self.id},{self.state}'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120))
+    state_id = db.Column(db.Integer, db.ForeignKey('states.id'), nullable=True)
+    #venue_id = db.Column(db.Integer, db.ForeignKey('venues.id', nullable=True))
+    venues = db.relationship(Venue, backref='venue')
+    artists = db.relationship(Artist, backref='artist')
 
-# #     def insert(self):
-# #         db.session.add(self)
-# #         db.session.commit()
+    # def __init__(self, city_id, name, state_id):
+    #     self.id = city_id
+    #     self.name = name
+    #     self.state_id = state_id
 
-# #     def update(self):
-# #         db.session.commit()
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "state_id": self.state_id
+        }
 
-# #     def delete(self):
-# #         db.session.delete(self)
-# #         db.session.commit()
+class Show(db.Model, crud_ops):
+    __tablename__ = "shows"
+
+    id = db.Column(db.Integer, primary_key=True)
+    venue_id =db.Column(db.Integer, db.ForeignKey("venues.id"))
+    artist_id = db.Column(db.Integer, db.ForeignKey("artists.id"))
+    start_time = db.Column(db.DateTime, nullable=False)
+
+    venues = db.relationship(Venue, back_populates="shows")
+    artists = db.relationship(Artist, back_populates="shows")
+
+    # def __init__(self, id, venue_id, artist_id, start_time):
+    #     self.id = id
+    #     self.venue_id = venue_id
+    #     self.artist_id = artist_id
+    #     self.start_time = start_time    
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name
+        }
+    
+    def __repr__(self):
+        return f'<the show is {self.id},{self.venue_id},{self.artist_id},{self.start_time}'
+
+    def artist_details(self):
+        return {
+            'artist_id': self.artist_id,
+            'artist_name': self.Artist.name,
+            'artist_image_link': self.Artist.image_link,
+            'start_time': self.start_time
+        }
+
+    def venue_details(self):
+        return {
+            'venue_id': self.venue_id,
+            'venue_name': self.Venue.name,
+            'venue_image_link': self.Venue.image_link,
+            'start_time': self.start_time
+        }
+
+    
+
 
 
