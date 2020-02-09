@@ -101,7 +101,6 @@ def venues():
                          }
                        for venue in city.venues]
             } for city in cities]
-  print(data)
   return render_template('pages/venues.html', areas=data)
   
 
@@ -142,7 +141,6 @@ def show_venue(venue_id):
     "seeking_talent": venue.seeking_talent,
     "seeking_description": venue.seeking_description,
     "image_link": venue.image_link,
-    #genres: TODO,
     "past_shows": [{"artist_id": show.artist_id,
                          "name": show.artists.name,
                          "start_time": format_datetime(str(show.start_time), format="full")
@@ -185,14 +183,10 @@ def create_venue_submission():
   
     
   new_city_id = get_city_id(city_name, state_name)
-  # print("CITY ID =======")
-  
-  # print(new_city_id)
   new_venue = Venue (
       genres = request.form.getlist('genres'), 
       name= venue_name, 
       city_id = new_city_id, 
-      #,shows=[]
       address = request.form['address'],
       phone = request.form['phone'],
       #website = request.form['website'],
@@ -299,8 +293,6 @@ def show_artist(artist_id):
 def edit_artist(artist_id):
   form = ArtistForm()
   artist = Artist.query.get(artist_id)
-  # print("ARTIST ======")
-  # print(artist.city_id)
   city = City.query.get(artist.city_id)
   state_name = State.query.get(city.state_id)
   if artist:
@@ -345,8 +337,6 @@ def edit_artist_submission(artist_id):
 def edit_venue(venue_id):
   form = VenueForm()
   venue = Venue.query.get(venue_id)
-  # print("VENUE")
-  # print(venue)
   city = City.query.get(venue.city_id)
   state_name = State.query.get(city.state_id)
   if venue:
