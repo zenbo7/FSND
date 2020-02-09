@@ -134,6 +134,14 @@ def show_venue(venue_id):
   data = {
     "id": venue.id,
     "name": venue.name,
+    "address": venue.address,
+    "phone": venue.phone,
+    "genres": venue.genres,
+    "website": venue.website,
+    "facebook_link": venue.facebook_link,
+    "seeking_talent": venue.seeking_talent,
+    "seeking_description": venue.seeking_description,
+    "image_link": venue.image_link,
     #genres: TODO,
     "past_shows": [{"artist_id": show.artist_id,
                          "name": show.artists.name,
@@ -172,6 +180,8 @@ def create_venue_submission():
   city_name = request.form['city']
   state_name = request.form['state']
   venue_name = request.form['name']
+  print("GENRES=======")
+  print(request.form.getlist('genres'))
   
     
   new_city_id = get_city_id(city_name, state_name)
@@ -179,10 +189,17 @@ def create_venue_submission():
   
   # print(new_city_id)
   new_venue = Venue (
-      #genres = genres, 
+      genres = request.form.getlist('genres'), 
       name= venue_name, 
-      city_id = new_city_id 
+      city_id = new_city_id, 
       #,shows=[]
+      address = request.form['address'],
+      phone = request.form['phone'],
+      #website = request.form['website'],
+      facebook_link = request.form['facebook_link'],
+      #seeking_talent = request.form['seeking_talent'],
+      #seeking_description = request.form['seeking_description'],
+      #image_link = request.form['image_link']
       )
  
   try: 
@@ -251,7 +268,9 @@ def show_artist(artist_id):
   data = {
     "id": artist.id,
     "name": artist.name,
-    #genres: TODO,
+    "phone": artist.phone,
+    "website": artist.website,
+    "genres": artist.genres,
     "past_shows": [{"venue_id": show.venue_id,
                          "name": show.venues.name,
                          "start_time": format_datetime(str(show.start_time), format="full")
@@ -280,18 +299,18 @@ def show_artist(artist_id):
 def edit_artist(artist_id):
   form = ArtistForm()
   artist = Artist.query.get(artist_id)
-  print("ARTIST ======")
-  print(artist.city_id)
+  # print("ARTIST ======")
+  # print(artist.city_id)
   city = City.query.get(artist.city_id)
   state_name = State.query.get(city.state_id)
   if artist:
         form.name.data = artist.name
-#         form.genres.data = artist.genres
+        form.genres.data = artist.genres
         form.city.data = city.name
         form.state.data = state_name
-#         form.phone.data = artist.phone
-#         form.facebook_link.data = artist.facebook_link
-#         form.image_link.data = artist.image_link
+        form.phone.data = artist.phone
+        form.facebook_link.data = artist.facebook_link
+        form.image_link.data = artist.image_link
   return render_template('forms/edit_artist.html', form=form, artist=artist)
 #   return render_template('errors/404.html')
 #   # TODO-->DONE: populate form with fields from artist with ID <artist_id>
@@ -306,10 +325,10 @@ def edit_artist_submission(artist_id):
   edited_artist = Artist.query.get(artist_id)
   edited_artist.name = request.form['name']
   edited_artist.city_id = city_id
-#   edited_artist.state = request.form['state']
-#   edited_artist.phone = request.form['phone']
-#   edited_artist.genres = request.form['genres']
-#   edited_artist.facebook_link = request.form['facebook_link']
+  edited_artist.state = request.form['state']
+  edited_artist.phone = request.form['phone']
+  edited_artist.genres = request.form.getlist('genres')
+  edited_artist.facebook_link = request.form['facebook_link']
 #   edited_artist.image_link = 'https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80'
 #   edited_artist.facebook_link = 'https://www.facebook.com/GunsNPetals'
   try:
@@ -326,23 +345,27 @@ def edit_artist_submission(artist_id):
 def edit_venue(venue_id):
   form = VenueForm()
   venue = Venue.query.get(venue_id)
-  print("VENUE")
-  print(venue)
+  # print("VENUE")
+  # print(venue)
   city = City.query.get(venue.city_id)
   state_name = State.query.get(city.state_id)
   if venue:
         form.name.data = venue.name
-#         form.genres.data = venue.genres
+        form.genres.data = venue.genres
         form.city.data = city.name
+        form.address.data = venue.address
         form.state.data = state_name
-#         form.phone.data = venue.phone
-#         form.facebook_link.data = venue.facebook_link
+        form.phone.data = venue.phone
+        form.facebook_link.data = venue.facebook_link
 #         form.image_link.data = venue.image_link
   return render_template('forms/edit_venue.html', form=form, venue=venue)
 #   return render_template('errors/404.html')
 #   # TODO-->DONE: populate form with values from venue with ID <venue_id>
 #   #return render_template('forms/edit_venue.html', form=form, venue=venue)
 
+
+#   # TODO-->DONE: take values from the form submitted, and update existing
+#   # venue record with ID <venue_id> using the new attributes
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
   city_id = get_city_id(request.form['city'], request.form['state'])
@@ -350,16 +373,10 @@ def edit_venue_submission(venue_id):
   edited_venue.id = venue_id
   edited_venue.name = request.form['name']
   edited_venue.city_id = city_id
-  
-#   # TODO-->DONE: take values from the form submitted, and update existing
-#   # venue record with ID <venue_id> using the new attributes
-  # edited_venue = Venue.query.get(venue_id)
-  # edited_venue.name = request.form['name']
-  # edited_venue.city = request.form['city']
-  # edited_venue.state = request.form['state']
-#   edited_venue.phone = request.form['phone']
-#   edited_venue.genres = request.form['genres']
-#   edited_venue.facebook_link = request.form['facebook_link']
+  edited_venue.address = request.form['address']
+  edited_venue.phone = request.form['phone']
+  edited_venue.genres = request.form.getlist('genres')
+  edited_venue.facebook_link = request.form['facebook_link']
 #   edited_venue.image_link = 'https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60'
 #   edited_venue.facebook_link = 'https://www.facebook.com/TheMusicalHop'
   try:
@@ -386,19 +403,17 @@ def create_artist_submission():
 #   # called upon submitting the new artist listing form
 #   # TODO:-->DONE insert form data as a new Venue record in the db, instead
 #   # TODO:-->DONE modify data to be the data object returned from db insertion
-#   genres=[]
-#   genres = request.form.getlist('genres')
-#   print(genres)
+
+
   city_name = request.form['city']
   state_name = request.form['state']
   artist_name = request.form['name']
   new_artist = Artist(
-    #genres = genres, 
+    genres = request.form.getlist('genres'), 
     name= artist_name, 
-    city_id = get_city_id(city_name, state_name)
-    # ,state = request.form['state'], 
-    # phone = request.form['phone'], 
-    # facebook_link = request.form['facebook_link']
+    city_id = get_city_id(city_name, state_name), 
+    phone = request.form['phone'], 
+    facebook_link = request.form['facebook_link']
   )
   print(new_artist)
   try:

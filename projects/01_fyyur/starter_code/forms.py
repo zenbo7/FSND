@@ -1,7 +1,11 @@
 from datetime import datetime
 from flask_wtf import Form
-from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField
+from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, ValidationError
 from wtforms.validators import DataRequired, AnyOf, URL
+
+
+
+
 
 class ShowForm(Form):
     artist_id = StringField(
@@ -17,6 +21,11 @@ class ShowForm(Form):
     )
 
 class VenueForm(Form):
+    def validate_genres(form, field):
+        if len(field.data)>3:
+            raise ValidationError('Too many genres!!!!!!.')
+    
+    
     name = StringField(
         'name', validators=[DataRequired()]
     )
@@ -90,7 +99,7 @@ class VenueForm(Form):
     )
     genres = SelectMultipleField(
         # TODO implement enum restriction
-        'genres', validators=[DataRequired()],
+        'genres', validators=[DataRequired(), validate_genres],
         choices=[
             ('Alternative', 'Alternative'),
             ('Blues', 'Blues'),
@@ -116,6 +125,8 @@ class VenueForm(Form):
     facebook_link = StringField(
         'facebook_link', validators=[URL()]
     )
+
+    
 
 class ArtistForm(Form):
     name = StringField(
