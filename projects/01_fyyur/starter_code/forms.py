@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask_wtf import Form
 from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, ValidationError
-from wtforms.validators import DataRequired, AnyOf, URL
+from wtforms.validators import DataRequired, AnyOf, URL, Length
 
 
 
@@ -21,13 +21,15 @@ class ShowForm(Form):
     )
 
 class VenueForm(Form):
-    def validate_genres(form, field):
-        if len(field.data)>3:
-            raise ValidationError('Too many genres!!!!!!.')
+    def validate_name(self, name):
+        # print(name.data)
+        # if len(name.data)>10:
+            raise ValidationError('What a Name!!!!!!.')
     
+    print('IN VENUE FORM')
     
     name = StringField(
-        'name', validators=[DataRequired()]
+        'name', validators=[DataRequired(), Length(min=1, max=10, message='Too long!')]
     )
     city = StringField(
         'city', validators=[DataRequired()]
@@ -99,7 +101,7 @@ class VenueForm(Form):
     )
     genres = SelectMultipleField(
         # TODO implement enum restriction
-        'genres', validators=[DataRequired(), validate_genres],
+        'genres', validators=[DataRequired()],
         choices=[
             ('Alternative', 'Alternative'),
             ('Blues', 'Blues'),

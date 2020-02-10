@@ -177,12 +177,15 @@ def create_venue_submission():
 
   city_name = request.form['city']
   state_name = request.form['state']
-  venue_name = request.form['name']
-  print("GENRES=======")
-  print(request.form.getlist('genres'))
-  
+  venue_name = request.form['name']  
     
   new_city_id = get_city_id(city_name, state_name)
+
+  form_genres = request.form.getlist('genres')
+  if len(form_genres) > 5:
+                    flash('Cannot select more than 5 genres')
+                    return redirect(url_for('create_artist_form'))
+
   new_venue = Venue (
       genres = request.form.getlist('genres'), 
       name= venue_name, 
@@ -312,7 +315,11 @@ def edit_artist(artist_id):
 def edit_artist_submission(artist_id):
 #   # TODO: take values from the form submitted, and update existing
 #   # artist record with ID <artist_id> using the new attributes
- 
+  form_genres = form.getlist('genres')
+  if len(form_genres) > 5:
+                    flash('Cannot select more than 5 genres')
+                    return redirect(url_for('create_artist_form'))
+
   city_id = get_city_id(request.form['city'], request.form['state'])
   edited_artist = Artist.query.get(artist_id)
   edited_artist.name = request.form['name']
@@ -358,6 +365,11 @@ def edit_venue(venue_id):
 #   # venue record with ID <venue_id> using the new attributes
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
+
+  form_genres = form.getlist('genres')
+  if len(form_genres) > 5:
+                    flash('Cannot select more than 5 genres')
+                    return redirect(url_for('create_artist_form'))
   city_id = get_city_id(request.form['city'], request.form['state'])
   edited_venue = Venue.query.get(venue_id)
   edited_venue.id = venue_id
@@ -393,7 +405,10 @@ def create_artist_submission():
 #   # called upon submitting the new artist listing form
 #   # TODO:-->DONE insert form data as a new Venue record in the db, instead
 #   # TODO:-->DONE modify data to be the data object returned from db insertion
-
+  form_genres = request.form.getlist('genres')
+  if len(form_genres) > 5:
+                    flash('Cannot select more than 5 genres')
+                    return redirect(url_for('create_artist_form'))
 
   city_name = request.form['city']
   state_name = request.form['state']
