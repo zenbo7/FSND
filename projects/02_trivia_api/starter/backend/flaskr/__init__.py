@@ -258,7 +258,7 @@ def create_app(test_config=None):
     
     found_question = False
     while not found_question:
-      # get random question
+      # get random question from the list of questions in the db
       question = get_random_question(questions)
       if not check_if_used(question, previous_questions):
           question_to_ask = question
