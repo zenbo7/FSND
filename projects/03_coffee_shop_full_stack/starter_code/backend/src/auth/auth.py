@@ -5,10 +5,10 @@ from jose import jwt
 from urllib.request import urlopen
 
 
-AUTH0_DOMAIN = 'udacity-fsnd.auth0.com'
+AUTH0_DOMAIN = 'matteoski.eu.auth0.com'
 ALGORITHMS = ['RS256']
-API_AUDIENCE = 'dev'
-
+API_AUDIENCE = 'https://coffee-permissions'
+token = 'YMZyxdvUDlaVwSJ8rTXpGNmcRmPrWbiX'
 ## AuthError Exception
 '''
 AuthError Exception
@@ -31,7 +31,36 @@ class AuthError(Exception):
     return the token part of the header
 '''
 def get_token_auth_header():
-   raise Exception('Not Implemented')
+    auth_header = request.headers.get('Authorization', None)
+
+    if not auth_header:
+        raise AuthError({
+            'code': 'authorization_header_missing',
+            'description': 'Authorization header is missing.'
+        }, 401)
+
+    splits = auth_header.split()
+    if splits[0].upper() != 'BEARER':
+        raise AuthError({
+            'code': 'invalid_header',
+            'description': 'Authorization header must start with "Bearer".'
+        }, 401)
+
+    elif len(splits) == 1:
+        raise AuthError({
+            'code': 'invalid_header',
+            'description': 'Wrong format of header.'
+        }, 401)
+
+    elif len(splits) > 2:
+        raise AuthError({
+            'code': 'invalid_header',
+            'description': 'Authorization header must contain the Bearer token.'
+        }, 401)
+
+    token = splits[1]
+    
+    return token
 
 '''
 @TODO implement check_permissions(permission, payload) method
@@ -45,7 +74,18 @@ def get_token_auth_header():
     return true otherwise
 '''
 def check_permissions(permission, payload):
-    raise Exception('Not Implemented')
+    if 'permissions' not in payload:
+        raise AuthError({
+            'code': 'invalid_claims',
+            'description': 'Permissions not included in JWT.'
+        }, 400)
+    
+    if permission not in payload['permissions']:
+        raise AuthError({
+            'code': 'unauthorized',
+            'description': 'Permission not found.'
+        }, 403)
+    return True
 
 '''
 @TODO implement verify_decode_jwt(token) method
@@ -61,7 +101,69 @@ def check_permissions(permission, payload):
     !!NOTE urlopen has a common certificate error described here: https://stackoverflow.com/questions/50236117/scraping-ssl-certificate-verify-failed-error-for-http-en-wikipedia-org
 '''
 def verify_decode_jwt(token):
-    raise Exception('Not Implemented')
+    # GET THE PUBLIC KEY FROM AUTH0
+    
+    jsonurl = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
+    
+    jwks = json.loads(jsonurl.read())
+    
+    #token2 = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik5UVkVSVUV3UVRBeFJqUkdORVl4TXpaRFEwWkROREE0T1VORVFVWTROemswUWpJMU9EZzVPUSJ9.eyJpc3MiOiJodHRwczovL21hdHRlb3NraS5ldS5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NWU0MmJmMjY2N2YxYmEwZWJiM2I2ZjU2IiwiYXVkIjoiaHR0cHM6Ly9jb2ZmZWUtcGVybWlzc2lvbnMiLCJpYXQiOjE1ODE0MzY1MzEsImV4cCI6MTU4MTQ0MzczMSwiYXpwIjoiWU1aeXhkdlVEbGFWd1NKOHJUWHBHTm1jUm1QcldiaVgiLCJzY29wZSI6IiIsInBlcm1pc3Npb25zIjpbImdldDpkcmlua3MtZGV0YWlsIl19.pPKR5IihAJHqNBvOsGxNduN_fiOXGfGPJ_asPprGDEZD2yOIQB-5QYXFx9IKyz9EtExPyy8yx8Frh21RrmBFXNDDEpu1rFSErL1dnisMaWjg1IJJdsq8Kjv-47K-8VMtKdwoOy18XSOtm0JyuoHzjF_eNCC7iTD9uzu11zHYj2OHOBJG617ZCW2HVVhPs2Hk7cp08CD63ggK3lNe3_KJGO4cf8hkujTQQMhMSC1vHnON97186Jc6_hFagqL2UUGs9gsekdfPhRm0hoeyFT7yPjOah71Ui2XQ5EA4l1-25636slzB549H4Vco9Z_Q69-4nKcXLiCEzdwdFKjggOOwig'
+    # GET THE DATA IN THE HEADER
+    unverified_header = jwt.get_unverified_header(token)
+    
+    # CHOOSE OUR KEY
+    rsa_key = {}
+    if 'kid' not in unverified_header:
+        raise AuthError({
+            'code': 'invalid_header',
+            'description': 'Authorization malformed.'
+        }, 401)
+
+    for key in jwks['keys']:
+        if key['kid'] == unverified_header['kid']:
+            rsa_key = {
+                'kty': key['kty'],
+                'kid': key['kid'],
+                'use': key['use'],
+                'n': key['n'],
+                'e': key['e']
+            }
+
+    if rsa_key:
+        
+        try:
+            # USE THE KEY TO VALIDATE THE JWT
+            payload = jwt.decode(
+                token,
+                rsa_key,
+                algorithms=ALGORITHMS,
+                audience=API_AUDIENCE,
+                issuer='https://' + AUTH0_DOMAIN + '/'
+            )
+
+            return payload
+
+        except jwt.ExpiredSignatureError:
+            raise AuthError({
+                'code': 'token_expired',
+                'description': 'Token expired.'
+            }, 401)
+
+        except jwt.JWTClaimsError:
+            raise AuthError({
+                'code': 'invalid_claims',
+                'description': 'Incorrect claims. Please, check the audience and issuer.'
+            }, 401)
+        except Exception:
+            raise AuthError({
+                'code': 'invalid_header',
+                'description': 'Unable to parse authentication token.'
+            }, 400)
+    raise AuthError({
+        'code': 'invalid_header',
+                'description': 'Unable to find the appropriate key.'
+    }, 400)
+
 
 '''
 @TODO implement @requires_auth(permission) decorator method
@@ -79,6 +181,13 @@ def requires_auth(permission=''):
         def wrapper(*args, **kwargs):
             token = get_token_auth_header()
             payload = verify_decode_jwt(token)
+            try:
+                payload = verify_decode_jwt(token)
+            except:
+                raise AuthError({
+                'code': 'invalid_token',
+                'description': 'Invalid token'
+            }, 401)
             check_permissions(permission, payload)
             return f(payload, *args, **kwargs)
 
